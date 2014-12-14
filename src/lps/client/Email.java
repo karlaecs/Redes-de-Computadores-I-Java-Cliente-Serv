@@ -22,7 +22,7 @@ public class Email {
 	public void enviarEmail(String emailCliente, String produto,
 			List<String> listaFeatures)  {
 		Properties props = new Properties();
-		/** Parï¿½metros de conexï¿½o com servidor Gmail */
+		/** Parâmetros de conexão com servidor Gmail */
 		props.put("mail.smtp.host", "smtp.gmail.com");
 		props.put("mail.smtp.socketFactory.port", "465");
 		props.put("mail.smtp.socketFactory.class",
@@ -45,11 +45,11 @@ public class Email {
 			Message message = new MimeMessage(session);
 			message.setFrom(new InternetAddress("emailtesteredes1@gmail.com")); // Remetente
 
-			Address[] toUser = InternetAddress // Destinatï¿½rio(s)
+			Address[] toUser = InternetAddress // Destinatário(s)
 					.parse(emailCliente);
 
 			message.setRecipients(Message.RecipientType.TO, toUser);
-			message.setSubject("Descriï¿½ï¿½o do seu produto");// Assunto
+			message.setSubject("Descrição do seu produto");// Assunto
 			message.setText(gerarListaProdutoFinal(produto, listaFeatures));
 			Transport.send(message);
 
@@ -81,43 +81,43 @@ public class Email {
 		String FEATUREESPECIFICA = listaFeatures.get(3);
 		String ESPECIFICA = listaFeatures.get(4);
 
-		String codigodoproduto = "Cï¿½digo do Produto: " + CODIGO + "\n";
+		String codigodoproduto = "Código do Produto: " + CODIGO + "\n";
 
-		String introducao = "Descriï¿½ï¿½o do Produto: O " + MODELO
-				+ " ï¿½ um " + DESCRICAO + ", cuja "
-				+ FEATUREOBRIGATORIADESCRICAO + " ï¿½ " + FEATUREOBRIGATORIADADOS
+		String introducao = "Descrição do Produto: O " + MODELO
+				+ " é um " + DESCRICAO + ", cuja "
+				+ FEATUREOBRIGATORIADESCRICAO + " é " + FEATUREOBRIGATORIADADOS
 				+ ".";
 
 		String descricao1 = " Com seus "
 				+ MOTOR
-				+ " cv de potï¿½ncia e com "
+				+ " cv de potência e com "
 				+ PESO
 				+ "t de peso bruto, e eixos "
 				+ EIXO
 				+ ", o "
 				+ MODELO
-				+ " ï¿½ perfeito para a aplicaï¿½ï¿½o proposta." 
-				+ " Alï¿½m disso o "
+				+ " é perfeito para a aplicação proposta." 
+				+ " Além disso o "
 				+ TIPO
 				+ " possui freios do tipo "
 				+ FREIOS
-				+ " e a direï¿½ï¿½o "
+				+ " e a direção "
 				+ DIRECAO
-				+ " o que resulta em baixa manutenï¿½ï¿½o e consequentemente, menor custo de operaï¿½ï¿½o."
+				+ " o que resulta em baixa manutenção e consequentemente, menor custo de operação."
 				+ "\n";
 		String descricao2 = "\tO "
 				+ MODELO
-				+ " possui alta tecnologia embarcada, jï¿½ que possui uma transmissï¿½o "
+				+ " possui alta tecnologia embarcada, já que possui uma transmissão "
 				+ TRANSMISSAO
-				+ ". Com toda esta tecnologia, o motorista trabalharï¿½"
+				+ ". Com toda esta tecnologia, o motorista trabalhará"
 				+ " melhor, resultando em maior rentabilidade. Por fim, o "
 				+ TIPO + " possui uma " + FEATUREESPECIFICA + " do tipo "
 				+ ESPECIFICA + " o que garante que o " + MODELO
 				+ " seja um produto completo.\n";
 		String descricao3 = "";
 
-		if (!listaFeatures.equals("")) {
-			descricao3 = "\tNa cabine do seu caminhï¿½o, podem ser encontrados ";
+		if (!listaFeatures.equals("") && TIPO.equals("Caminhão")) {
+			descricao3 = "\tNa cabine do seu caminhão, podem ser encontrados ";
 			for (int i = 5; i < listaFeatures.size(); i++) {
 				if (i != (listaFeatures.size() - 1))
 					descricao3 = descricao3 + " " + listaFeatures.get(i)
@@ -129,8 +129,8 @@ public class Email {
 
 		}
 
-		String descricao4 = "\n\tPor isso, peï¿½a seu " + TIPO + " " + MODELO
-				+ ". Rentabilidade, resistï¿½ncia e tecnologia definem o " + TIPO
+		String descricao4 = "\n\tPor isso, peça seu " + TIPO + " " + MODELO
+				+ ". Rentabilidade, resistência e tecnologia definem o " + TIPO
 				+ " " + MODELO + ".\n";
 
 		return codigodoproduto + introducao + descricao1 + descricao2

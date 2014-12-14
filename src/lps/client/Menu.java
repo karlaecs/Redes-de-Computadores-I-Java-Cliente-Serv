@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import lps.client.Email;
 
 import org.json.simple.parser.ContainerFactory;
@@ -66,9 +70,9 @@ public class Menu {
 
 	public void imprimeListaProdutos(String produto) {
 		String[] listaProduto = produto.split(";");
-		String produtoResultante = "Cï¿½digo do Produto: " + listaProduto[0]
+		String produtoResultante = "Código do Produto: " + listaProduto[0]
 				+ "\n" + "Modelo do produto: " + listaProduto[1] + "\n"
-				+ "Eixo: " + listaProduto[2] + "\n" + "Descriï¿½ï¿½o do Produto: "
+				+ "Eixo: " + listaProduto[2] + "\n" + "Descrição do Produto: "
 				+ listaProduto[3];
 
 		if (listaProduto.length > 4) {
@@ -82,7 +86,7 @@ public class Menu {
 
 	public void imprimeListaFeatures(String feature) {
 		String[] listaFeature = feature.split(";");
-		String featureResultante = "Cï¿½digo da Feature: " + listaFeature[0]
+		String featureResultante = "Código da Feature: " + listaFeature[0]
 				+ "\n" + listaFeature[1] + ": " + listaFeature[2];
 
 		System.out.println(featureResultante);
@@ -99,13 +103,13 @@ public class Menu {
 
 		String response;
 		System.out
-				.println("Agora, listaremos as(os) " + tipo + " disponï¿½veis.");
+				.println("Agora, listaremos as(os) " + tipo + " disponíveis.");
 		response = this.cliente.requestListar("LISTAR FEATURES " + codigoListar
 				+ "\n");
 		verificarErros(response);
 		decoding(response, 1);
 		System.out.println("Escolha as(os) " + tipo
-				+ " digitando seu cï¿½digo correspondente.\n");
+				+ " digitando seu código correspondente.\n");
 		String codigo = sc.next();
 		codigo = codigo.toUpperCase();
 
@@ -122,7 +126,7 @@ public class Menu {
 	public void verificarErros(String response) {
 		if (response.equals("ERRO")) {
 			System.out
-					.println("Ocorreu um erro e o sistema foi encerrado. Verifique a sintaxe de seus comandos ou verifique a conexï¿½o com o servidor.");
+					.println("Ocorreu um erro e o sistema foi encerrado. Verifique a sintaxe de seus comandos ou verifique a conexão com o servidor.");
 			System.exit(0);
 		}
 	}
@@ -132,28 +136,28 @@ public class Menu {
 		Scanner sc = new Scanner(System.in);
 
 		System.out
-				.println("Bem-vindos ao sistema de geraï¿½ï¿½o de produtos! \n "
-						+ "Digite a opï¿½ï¿½o do tipo de produto que deseja, e nï¿½s listaremos todas as opï¿½ï¿½es disponï¿½veis.\n"
-						+ "0 -> Caminhï¿½es Convencionais Leves\n"
-						+ "1 -> Caminhï¿½es Convencionais Semi-Pesados\n"
-						+ "2 -> Caminhï¿½o \"Cavalo\"\n"
-						+ "3 -> Chassis de mini e micro-ï¿½nibus\n"
+				.println("Bem-vindos ao sistema de geração de produtos! \n "
+						+ "Digite a opção do tipo de produto que deseja, e nós listaremos todas as opções disponíveis.\n"
+						+ "0 -> Caminhões Convencionais Leves\n"
+						+ "1 -> Caminhões Convencionais Semi-Pesados\n"
+						+ "2 -> Caminhão \"Cavalo\"\n"
+						+ "3 -> Chassis de mini e micro-ônibus\n"
 						+ "4 -> Chassis de midibus\n"
-						+ "5 -> Chassis de ï¿½nibus de 17t\n"
-						+ "6 -> Chassis de ï¿½nibus rodoviï¿½rios\n"
-						+ "7 -> Chassis de ï¿½nibus articulados e biarticulados");
+						+ "5 -> Chassis de ônibus de 17t\n"
+						+ "6 -> Chassis de ônibus rodoviários\n"
+						+ "7 -> Chassis de ônibus articulados e biarticulados");
 
-		// Lendo a opï¿½ï¿½o digitada pelo cliente
+		// Lendo a opção digitada pelo cliente
 		int opcao = sc.nextInt();
 		String response = this.cliente.requestListar("LISTAR PRODUTOS " + opcao
 				+ "\n");
 		verificarErros(response);
 
-		System.out.println("Listando todos os produtos disponï¿½veis.\n");
+		System.out.println("Listando todos os produtos disponíveis.\n");
 		decoding(response, 0);
 
 		System.out
-				.println("Escolha seu produto digitando seu cï¿½digo correspondente.\n");
+				.println("Escolha seu produto digitando seu código correspondente.\n");
 		String codigo = sc.next();
 		codigo = codigo.toUpperCase();
 
@@ -173,15 +177,15 @@ public class Menu {
 
 		String[] splitFeature = iniciarFeature(0, "tipos de freios").split(";");
 		listaFeatures.add(splitFeature[2]);
-		splitFeature = iniciarFeature(1, "transmissï¿½es de caixa de marcha")
+		splitFeature = iniciarFeature(1, "transmissões de caixa de marcha")
 				.split(";");
 		listaFeatures.add(splitFeature[2]);
-		splitFeature = iniciarFeature(2, "direï¿½ï¿½o").split(";");
+		splitFeature = iniciarFeature(2, "direção").split(";");
 		listaFeatures.add(splitFeature[2]);
 
-		// Agora irï¿½ entrar nas features especï¿½ficas para caminhï¿½o ou ï¿½nibus.
-		// Isto ï¿½ determinado pela variï¿½vel opcao, que definiu se ï¿½ caminhï¿½o ou
-		// ï¿½nibus
+		// Agora irá entrar nas features específicas para caminhão ou ônibus.
+		// Isto é determinado pela variável opcao, que definiu se é caminhão ou
+		// ônibus
 
 		if (opcao < 4) {
 			splitFeature = iniciarFeature(4, "carrocerias").split(";");
@@ -194,8 +198,8 @@ public class Menu {
 				listaFeatures.add(splitFeature[2]);
 
 				System.out
-						.println("Deseja adicionar mais um incremento ï¿½ sua cabine? Entï¿½o digite \"Sim\" (sem as aspas)\n"
-								+ "Caso contrï¿½rio, \"Nao\" (sem as aspas) ");
+						.println("Deseja adicionar mais um incremento à sua cabine? Então digite \"Sim\" (sem as aspas)\n"
+								+ "Caso contrário, \"Nao\" (sem as aspas) ");
 				String repetir = sc.next();
 				repetir = repetir.toUpperCase();
 
@@ -204,19 +208,23 @@ public class Menu {
 			}
 
 		} else {
-			splitFeature = iniciarFeature(5,"suspensï¿½es").split(";");
+			splitFeature = iniciarFeature(5,"suspensões").split(";");
 			listaFeatures.add(splitFeature[1]);
 			listaFeatures.add(splitFeature[2]);
 		}
 		Email email = new Email();
 		
-		System.out.println("Agora, digite seu email, e nï¿½s lhe enviaremos todos os detalhes sobre o seu produto");
+		System.out.println("Agora, digite seu email, e nós lhe enviaremos todos os detalhes sobre o seu produto");
 		
 		String emailUsuario = sc.next();
 		
-		email.enviarEmail(emailUsuario, produto, listaFeatures);
-
-		//while (true);
+		Pattern p = Pattern.compile("^[\\w-]+(\\.[\\w-]+)*@([\\w-]+\\.)+[a-zA-Z]{2,7}$");  
+	    Matcher m = p.matcher(emailUsuario);  
+	    if (!m.find()) System.err.println("Email inválido. Por favor, tente novamente. Encerrando.\n");
+	    else email.enviarEmail(emailUsuario, produto, listaFeatures);		
+		
+		response = this.cliente.requestListar("ENCERRAR\n");
+		cliente.desconectar();
 
 	}
 

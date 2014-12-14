@@ -70,7 +70,7 @@ public class Cliente {
 
 	public String requestListar(String mensagem) throws IOException {
 		try {
-			System.out.println("=> Enviando mensagem: " + mensagem);
+			//System.out.println("=> Enviando mensagem: " + mensagem);
 			output.write(mensagem);
 			output.flush();
 		} catch (IOException e) {
@@ -80,7 +80,7 @@ public class Cliente {
 
 		// Resposta do cliente com um objeto Json
 		this.response = in.readLine();
-		System.out.println("===> resposta" + this.response);
+		//System.out.println("===> resposta" + this.response);
 
 		return this.response;
 
