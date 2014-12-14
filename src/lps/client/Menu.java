@@ -2,6 +2,7 @@ package lps.client;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -9,188 +10,214 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-import org.json.simple.JSONValue;
+import lps.client.Email;
+
 import org.json.simple.parser.ContainerFactory;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import lps.server.Chassi;
-import lps.server.ChassiCaminhao;
-import lps.server.ChassiOnibus;
-import lps.server.Produtos;
-
-
 public class Menu {
 
 	Cliente cliente;
-	
+
 	public Menu(Cliente cliente) {
 		super();
 		this.cliente = cliente;
 	}
 
-	public void decoding(String response)
-	{
+	@SuppressWarnings("rawtypes")
+	public void decoding(String response, int tipo) {
 		// Decodificando para String os dados recebidos
-				JSONParser parser = new JSONParser();
-				ContainerFactory containerFactory = new ContainerFactory() {
-					public List creatArrayContainer() {
-						return new LinkedList();
-					}
+		verificarErros(response);
+		JSONParser parser = new JSONParser();
+		ContainerFactory containerFactory = new ContainerFactory() {
+			public List<?> creatArrayContainer() {
+				return new LinkedList<Object>();
+			}
 
-					public Map createObjectContainer() {
-						return new LinkedHashMap();
-					}
+			public Map<?, ?> createObjectContainer() {
+				return new LinkedHashMap<Object, Object>();
+			}
 
-				};
-				try {
-					Map json = (Map) parser.parse(response, containerFactory);
-					Iterator iter = json.entrySet().iterator();
-					System.out.println("==iterate result==");
-					while (iter.hasNext()) {
-						Map.Entry entry = (Map.Entry) iter.next();
-						System.out.println(entry.getKey() + "=>" + entry.getValue());
-					}
+		};
+		try {
+			Map<?, ?> json = (Map<?, ?>) parser.parse(response,
+					containerFactory);
+			Iterator<?> iter = json.entrySet().iterator();
+			imprimeBarra();
+			while (iter.hasNext()) {
+				Map.Entry entry = (Map.Entry) iter.next();
+				if (tipo == 0)
+					imprimeListaProdutos((String) entry.getValue());
+				else if (tipo == 1)
+					imprimeListaFeatures((String) entry.getValue());
+			}
 
-					System.out.println("==toJSONString()==");
-					System.out.println(JSONValue.toJSONString(json));
-				} catch (ParseException pe) {
-					System.out.println(pe);
-				}
+			// System.out.println("==toJSONString()==");
+			// System.out.println(JSONValue.toJSONString(json));
+		} catch (ParseException pe) {
+			System.out.println(pe);
+		}
 	}
+
+	public void imprimeBarra() {
+		System.out.println("===================");
+	}
+
+	public void imprimeListaProdutos(String produto) {
+		String[] listaProduto = produto.split(";");
+		String produtoResultante = "C�digo do Produto: " + listaProduto[0]
+				+ "\n" + "Modelo do produto: " + listaProduto[1] + "\n"
+				+ "Eixo: " + listaProduto[2] + "\n" + "Descri��o do Produto: "
+				+ listaProduto[3];
+
+		if (listaProduto.length > 4) {
+			produtoResultante = produtoResultante + "\n" + listaProduto[4]
+					+ ": " + listaProduto[5];
+		}
+		System.out.println(produtoResultante);
+		imprimeBarra();
+
+	}
+
+	public void imprimeListaFeatures(String feature) {
+		String[] listaFeature = feature.split(";");
+		String featureResultante = "C�digo da Feature: " + listaFeature[0]
+				+ "\n" + listaFeature[1] + ": " + listaFeature[2];
+
+		System.out.println(featureResultante);
+		imprimeBarra();
+
+	}
+
+	
+
+	public String iniciarFeature(int codigoListar, String tipo)
+			throws IOException {
+		@SuppressWarnings("resource")
+		Scanner sc = new Scanner(System.in);
+
+		String response;
+		System.out
+				.println("Agora, listaremos as(os) " + tipo + " dispon�veis.");
+		response = this.cliente.requestListar("LISTAR FEATURES " + codigoListar
+				+ "\n");
+		verificarErros(response);
+		decoding(response, 1);
+		System.out.println("Escolha as(os) " + tipo
+				+ " digitando seu c�digo correspondente.\n");
+		String codigo = sc.next();
+		codigo = codigo.toUpperCase();
+
+		response = this.cliente.requestListar("SELECIONAR FEATURES " + codigo
+				+ "\n");
+		verificarErros(response);
+		System.out.println("Listando a feature escolhida\n");
+		imprimeBarra();
+		imprimeListaFeatures(response);
+
+		return response;
+	}
+
+	public void verificarErros(String response) {
+		if (response.equals("ERRO")) {
+			System.out
+					.println("Ocorreu um erro e o sistema foi encerrado. Verifique a sintaxe de seus comandos ou verifique a conex�o com o servidor.");
+			System.exit(0);
+		}
+	}
+
 	public void iniciarAplicacao() throws UnknownHostException, IOException {
 		@SuppressWarnings("resource")
 		Scanner sc = new Scanner(System.in);
-		
+
 		System.out
-				.println("Bem-vindos ao sistema de gercaoo de produtos! \n "
-						+ "Digite a opção do tipo de produto que deseja, e n�s listaremos todas as op��es dispon�veis.\n"
-						+ "0 -> Caminh�o\n" + "1 -> Chassi de �nibus");
-		
-		// Lendo a opção digitada pelo cliente
+				.println("Bem-vindos ao sistema de gera��o de produtos! \n "
+						+ "Digite a op��o do tipo de produto que deseja, e n�s listaremos todas as op��es dispon�veis.\n"
+						+ "0 -> Caminh�es Convencionais Leves\n"
+						+ "1 -> Caminh�es Convencionais Semi-Pesados\n"
+						+ "2 -> Caminh�o \"Cavalo\"\n"
+						+ "3 -> Chassis de mini e micro-�nibus\n"
+						+ "4 -> Chassis de midibus\n"
+						+ "5 -> Chassis de �nibus de 17t\n"
+						+ "6 -> Chassis de �nibus rodovi�rios\n"
+						+ "7 -> Chassis de �nibus articulados e biarticulados");
+
+		// Lendo a op��o digitada pelo cliente
 		int opcao = sc.nextInt();
+		String response = this.cliente.requestListar("LISTAR PRODUTOS " + opcao
+				+ "\n");
+		verificarErros(response);
 
-		//Escolher entre caminhão - 0 e Ônibus - 1
-		if (opcao == 0) {
-			
-			// requisição ao servidor para mandar a lista do caminhão
-			String response = this.cliente.requestListar("LISTA 0\n");
+		System.out.println("Listando todos os produtos dispon�veis.\n");
+		decoding(response, 0);
 
-			System.out
-					.println("Listando todos os produtos disponíveis.\n");
-			decoding(response);
-			
-			ChassiCaminhao chassi = new ChassiCaminhao();
-		
-			Produtos produtoEscolhido = chassi.escolherProdutos(sc.nextInt());
-			chassi.setAlturaCabine(produtoEscolhido.peso);
+		System.out
+				.println("Escolha seu produto digitando seu c�digo correspondente.\n");
+		String codigo = sc.next();
+		codigo = codigo.toUpperCase();
 
-			System.out.println("Voc� escolheu o seguinte caminh�o: \n"
-					+ "Tipo do Caminh�o: "
-					+ chassi.textoTipoChassi(chassi.getTipoChassi()) + "\n"
-					+ produtoEscolhido + "\n"
-					+ "Este caminh�o possui a altura da cabine igual a "
-					+ chassi.getAlturaCabine() + "m\n");
+		response = this.cliente.requestListar("SELECIONAR PRODUTOS " + codigo
+				+ "\n");
+		String produto = response;
+		verificarErros(response);
+		System.out.println("Listando o produto escolhido\n");
+		imprimeBarra();
+		imprimeListaProdutos(response);
 
-			System.out
-					.println("Vamos adicionar novas caracteristicas no caminh�o. Responda as seguintes quest�es atentamente."
-							+ "\n");
+		produto = produto + ";";
 
-			System.out
-					.println("Escolha um sistema de transmiss�o para seu caminh�o: \n"
-							+ "0 -> ZF\n1 -> Eaton");
-			chassi.setTransmissao(sc.nextInt());
-			System.out
-					.println("Agora escolha um sistema de dire��o para seu caminh�o: \n"
-							+ "0 -> Hidr�ulica\n1 -> Comum");
-			chassi.setDirecao(sc.nextInt());
-			System.out
-					.println("Agora escolha um sistema de freios para seu caminh�o: \n"
-							+ "0 -> ABS\n1 -> Comum");
-			chassi.setFreios(sc.nextInt());
-			System.out
-					.println("Por fim, digite o que voc� deseja adicionar na cabine do seu caminh�o \n"
-							+ "Exemplo: Ar condicionado");
-			chassi.setAdicionaisCabine(sc.next());
+		List<String> listaFeatures = new ArrayList<String>();
+		System.out
+				.println("Agora, deve-se adicionar novas features ao seu produto.\n");
 
-			System.out
-					.println("O seu caminh�o est� pronto! Abaixo, todos os dados do produto: \n\n"
-							+ "Tipo do Caminh�o: "
-							+ chassi.textoTipoChassi(chassi.getTipoChassi())
-							+ "\n"
-							+ produtoEscolhido
-							+ "\n"
-							+ "Sistema de transmiss�o: "
-							+ chassi.textoTipoTransmissao(chassi
-									.getTransmissao())
-							+ "\n"
-							+ "Sistema de dire��o: "
-							+ chassi.textoTipoDirecao(chassi.getDirecao())
-							+ "\n"
-							+ "Sistema de Freios: "
-							+ chassi.textoTipoFreios(chassi.getFreios())
-							+ "\n"
-							+ "Este caminh�o possui a altura da cabine igual a "
-							+ chassi.getAlturaCabine()
-							+ "m\n"
-							+ "A cabine possui como adicionais: "
-							+ chassi.getAdicionaisCabine() + "\n");
+		String[] splitFeature = iniciarFeature(0, "tipos de freios").split(";");
+		listaFeatures.add(splitFeature[2]);
+		splitFeature = iniciarFeature(1, "transmiss�es de caixa de marcha")
+				.split(";");
+		listaFeatures.add(splitFeature[2]);
+		splitFeature = iniciarFeature(2, "dire��o").split(";");
+		listaFeatures.add(splitFeature[2]);
+
+		// Agora ir� entrar nas features espec�ficas para caminh�o ou �nibus.
+		// Isto � determinado pela vari�vel opcao, que definiu se � caminh�o ou
+		// �nibus
+
+		if (opcao < 4) {
+			splitFeature = iniciarFeature(4, "carrocerias").split(";");
+			listaFeatures.add(splitFeature[1]);
+			listaFeatures.add(splitFeature[2]);
+
+			while (true) {
+				splitFeature = iniciarFeature(3, "adicionais de cabine").split(
+						";");
+				listaFeatures.add(splitFeature[2]);
+
+				System.out
+						.println("Deseja adicionar mais um incremento � sua cabine? Ent�o digite \"Sim\" (sem as aspas)\n"
+								+ "Caso contr�rio, \"Nao\" (sem as aspas) ");
+				String repetir = sc.next();
+				repetir = repetir.toUpperCase();
+
+				if (!repetir.equals("SIM"))
+					break;
+			}
+
 		} else {
-			ChassiOnibus chassi = new ChassiOnibus();
-
-			System.out
-					.println("Listando todos os produtos dispon�veis. Selecione o produto atrav�s de seu c�digo\n");
-
-			System.out.println(((Chassi) chassi).listarProduto(false, 0));
-
-			Produtos produtoEscolhido = chassi.escolherProdutos(sc.nextInt());
-			chassi.setPosicaoMotor(produtoEscolhido.motor);
-
-			System.out.println("Voc� escolheu o seguinte chassi de �nibus: \n"
-					+ produtoEscolhido + "\n" + "Posi��o do motor: "
-					+ chassi.getPosicaoMotor() + "\n");
-
-			System.out
-					.println("Vamos adicionar novas caracteristicas no chassi de �nibus. Responda as seguintes quest�es atentamente."
-							+ "\n");
-
-			System.out
-					.println("Escolha um sistema de transmiss�o para seu chassi de �nibus: \n"
-							+ "0 -> ZF\n1 -> Eaton");
-			chassi.setTransmissao(sc.nextInt());
-			System.out
-					.println("Agora escolha um sistema de dire��o para seu chassi de �nibus: \n"
-							+ "0 -> Hidr�ulica\n1 -> Comum");
-			chassi.setDirecao(sc.nextInt());
-			System.out
-					.println("Agora escolha um sistema de freios para seu chassi de �nibus: \n"
-							+ "0 -> ABS\n1 -> Comum");
-			chassi.setFreios(sc.nextInt());
-			System.out
-					.println("Agora escolha um sistema de suspens�o para seu chassi de �nibus: \n"
-							+ "0 -> Suspens�o a Ar\n1 -> Suspens�o Met�lica");
-			chassi.setSuspensao(sc.nextInt());
-
-			System.out
-					.println("O seu chassi de �nibus est� pronto! Abaixo, todos os dados do produto: \n\n"
-							+ produtoEscolhido
-							+ "\n"
-							+ "Sistema de transmiss�o: "
-							+ chassi.textoTipoTransmissao(chassi
-									.getTransmissao())
-							+ "\n"
-							+ "Sistema de dire��o: "
-							+ chassi.textoTipoDirecao(chassi.getDirecao())
-							+ "\n"
-							+ "Sistema de Freios: "
-							+ chassi.textoTipoFreios(chassi.getFreios())
-							+ "\n"
-							+ "Sistema de suspens�o: "
-							+ chassi.textoTipoSuspensao(chassi.getSuspensao())
-							+ "\n");
-
+			splitFeature = iniciarFeature(5,"suspens�es").split(";");
+			listaFeatures.add(splitFeature[1]);
+			listaFeatures.add(splitFeature[2]);
 		}
-		System.out.println("Pressione \"Q\" para sair\n");
-		opcao = sc.nextByte();
+		Email email = new Email();
+		
+		System.out.println("Agora, digite seu email, e n�s lhe enviaremos todos os detalhes sobre o seu produto");
+		
+		String emailUsuario = sc.next();
+		
+		email.enviarEmail(emailUsuario, produto, listaFeatures);
+
+		//while (true);
+
 	}
+
 }

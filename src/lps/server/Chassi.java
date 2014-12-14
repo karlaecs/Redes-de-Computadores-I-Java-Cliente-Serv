@@ -1,192 +1,143 @@
 package lps.server;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.json.simple.JSONObject;
+import lps.database.Features;
+import lps.database.Produtos;
+
 import org.json.simple.JSONValue;
 
-import com.sun.javafx.scene.paint.GradientUtils.Parser;
 /*
- Aqui ï¿½ a classe que define um chassi (um produto). Leia mais sobre o projeto de LPS aqui: 
+ Aqui é a classe que define um chassi (um produto).
+ Tal projeto foi inicialmente apresentado na disciplina de Linhas de Produtos de Software, ministrada pelo Prof. Arturo Hernandez:
+ Para maiores detalhes sobre este projeto, acesse o relatório completo através do link abaixo: 
  https://drive.google.com/file/d/0B1dyo0OuV6fEQ1BuaEhQNGJMLWI5Vzl5NmM3V2p5UlRTLVZz/view?usp=sharing
  */
 
 public abstract class Chassi {
 
-	protected int motor;
-	private int transmissao;
-	private int freios;
-	private int direcao;
-	private int peso;
-	private String eixo;
-	private List<Produtos> arrayProdutos;
-	private int tipoChassi;
-
 	public Chassi() {
 
 	}
 
-	public int getMotor() {
-		return motor;
+	public String definirProduto(String codigo) {
+		Produtos produtos = new Produtos(null, null, 0, 0, null, null);
+		return produtos.consultaBanco(codigo);
 	}
 
-	public void setMotor(int motor) {
-		this.motor = motor;
+	public String definirFeature(String codigo) {
+		Features feature = new Features(null, null, null);
+		return feature.consultaBanco(codigo);
 	}
 
-	public int getPeso() {
-		return peso;
-	}
+	public String listarProduto(int tipoChassi) {
 
-	public int getTransmissao() {
-		return transmissao;
-	}
-
-	public void setTransmissao(int transmissao) {
-		this.transmissao = transmissao;
-	}
-
-	public String getEixo() {
-		return eixo;
-	}
-
-	public void setEixo(int rodas) {
-
-		switch (rodas) {
+		ArrayList<Produtos> produto = new ArrayList<Produtos>();
+		Produtos produtos = new Produtos(null, null, 0, 0, null, null);
+		boolean eValido = true;
+		switch (tipoChassi) {
+		case 0:
+			// Caminhões convencionais leves
+			produto = produtos.listarProdutos("caminhao", 3, 120, 10, 160);
+			break;
+		case 1:
+			// Caminhões convencionais semi-pesados
+			produto = produtos.listarProdutos("caminhao", 13, 190, 17, 280);
+			break;
+		case 2:
+			// Caminhões cavalo
+			produto = produtos.listarProdutos("caminhao", 17, 330, 25, 390);
+			break;
+		case 3:
+			// Micros
+			produto = produtos.listarProdutos("onibus", 5, 150, 9, 160);
+			break;
 		case 4:
-			eixo = "4x2";
+			// Midis
+			produto = produtos.listarProdutos("onibus", 12, 180, 16, 190);
+			break;
+		case 5:
+			// 17t
+			produto = produtos.listarProdutos("onibus", 17, 180, 17, 300);
 			break;
 		case 6:
-			eixo = "6x4";
+			// rodoviários
+			produto = produtos.listarProdutos("onibus", 18, 180, 27, 410);
 			break;
-		case 8:
-			eixo = "8x2";
+		case 7:
+			// articulados
+			produto = produtos.listarProdutos("onibus", 26, 360, 41, 360);
 			break;
+		default:
+			eValido = false;
 		}
-	}
 
-	public int getFreios() {
-		return freios;
-	}
-
-	public void setFreios(int freios) {
-		if (freios == 0) {
-			// System.out.println("Freios ABS");
-		} else {
-			// System.out.println("Freios Comuns");
-		}
-	}
-
-	public int getDirecao() {
-		return direcao;
-	}
-
-	public void setDirecao(int direcao) {
-		if (direcao == 0) {
-			// System.out.println("Direï¿½ï¿½o Hidrï¿½ulica");
-		} else {
-			// System.out.println("Direï¿½ï¿½o Comum");
-		}
-	}
-
-	public Produtos definirProduto() {
-		int peso = getPeso();
-		int motor = getMotor();
-		String eixo = getEixo();
-		Produtos produto = new Produtos(true, 0, 0, null, null);
-
-		return produto.consultaBanco(true, peso, motor, eixo);
-	}
-
-	public String listarProduto(boolean aplicacao, int tipoChassi) {
-		
-		ArrayList<Produtos> produto = new ArrayList<Produtos>();
-		Produtos produtos = new Produtos(true, 0, 0, null, null);
-	
-		if (aplicacao == true) {
-			if (tipoChassi == 0) {
-				produto = produtos.listarProdutos(true, 3, 120);
-			} else if (tipoChassi == 1) {
-				produto = produtos.listarProdutos(true, 17, 280);
+		if (eValido) {
+			// Convertendo para um objeto Json
+			Map<Integer, String> data = new LinkedHashMap<Integer, String>();
+			String jsonText = "";
+			// Defina essa resposta no nosso documento que o servidor sempre vai
+			// responder uma listagem de caminha nessa ordem ai
+			// codigo: [ motor, eixo, descriçao]
+			for (int i = 0; i < produto.size(); i++) {
+				String lista = produto.get(i).toString();
+				data.put(i, lista);
 			}
-		} else {
-			produto = produtos.listarProdutos(false, 5, 150);
+			jsonText = JSONValue.toJSONString(data);
+
+			return jsonText;
 		}
 
-		this.arrayProdutos = produto;
-		
-		// Convertendo para um objeto Json
-		Map data = new LinkedHashMap();
-		LinkedList list = new LinkedList();
-		String jsonText= "";
-		// Defina essa resposta no nosso documento que o servidor sempre vai responder uma listagem de caminha nessa ordem ai
-		// codigo: [ motor, eixo, descriÃ§ao] 
-		for (int i = 0; i < produto.size(); i++) {
-			//list.add(i);
-			list.add(produto.get(i).peso + "." + produto.get(i).motor);
-			list.add(produto.get(i).eixo);
-			list.add(produto.get(i).descricao);
-			data.put(i, list);
+		return "ERRO";
+	}
+
+	public String listarFeature(int tipoFeature) {
+
+		ArrayList<Features> feature = new ArrayList<Features>();
+		Features features = new Features(null, null, null);
+		boolean eValido = true;
+		switch (tipoFeature) {
+		case 0:
+			feature = features.listarFeatures("Freios");
+			break;
+		case 1:
+			feature = features.listarFeatures("Transmissão");
+			break;
+		case 2:
+			feature = features.listarFeatures("Direção");
+			break;
+		case 3:
+			feature = features.listarFeatures("Adicionais de Cabine");
+			break;
+		case 4:
+			feature = features.listarFeatures("Carroceria");
+			break;
+		case 5:
+			feature = features.listarFeatures("Suspensão");
+			break;
+		default:
+			eValido = false;
 		}
-		jsonText = JSONValue.toJSONString(data);
-		//System.out.print(jsonText);
-		//return produto;	
-		/*String lista = "";
-		for (int i = 0; i < produto.size(); i++) {
-			lista = lista
-					+ "Codigo: " + i + "\n"
-					+ "Modelo: " + produto.get(i).peso + "." + produto.get(i).motor + "\n" 
-					+ "Eixo: " + produto.get(i).eixo + "\n" 
-					+"DescriÃ§ao: " + produto.get(i).descricao + "\n";
 
-		}*/
+		if (eValido) {
+			// Convertendo para um objeto Json
+			Map<Integer, String> data = new LinkedHashMap<Integer, String>();
+			String jsonText = "";
+			// Defina essa resposta no nosso documento que o servidor sempre vai
+			// responder uma listagem de caminha nessa ordem ai
+			// codigo: [ motor, eixo, descriçao]
+			for (int i = 0; i < feature.size(); i++) {
+				String lista = feature.get(i).toString();
+				data.put(i, lista);
+			}
+			jsonText = JSONValue.toJSONString(data);
+
+			return jsonText;
+		}
 		
-		return jsonText;
-	}
-
-	public Produtos escolherProdutos(int opcao) {
-		return arrayProdutos.get(opcao);
-	}
-
-	public int getTipoChassi() {
-		return tipoChassi;
-	}
-
-	public void setTipoChassi(int tipoChassi) {
-		this.tipoChassi = tipoChassi;
-	}
-
-	public String textoTipoTransmissao(int transmissao) {
-		String textoTipo;
-		if (transmissao == 0)
-			textoTipo = "ZF";
-		else
-			textoTipo = "Eaton";
-		return textoTipo;
-	}
-
-	public String textoTipoDirecao(int direcao) {
-		String textoTipo;
-		if (direcao == 0)
-			textoTipo = "Hidrï¿½ulica";
-		else
-			textoTipo = "Comum";
-		return textoTipo;
-	}
-
-	public String textoTipoFreios(int freios) {
-		String textoTipo;
-		if (freios == 0)
-			textoTipo = "ABS";
-		else
-			textoTipo = "Comum";
-		return textoTipo;
+		return "ERRO";
 	}
 
 }
